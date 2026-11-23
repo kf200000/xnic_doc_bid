@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# 运行时数据 / 密钥 / 生成物（严禁提交）
+# 仅保留目录模板配置 tech_outline_profiles.json
+data/*
+!data/tech_outline_profiles.json
+
+# 上传附件与日志
+uploads/
+logs/
+
+# 演示样张二进制（保留生成脚本与文本）
+.samples/*.pdf
+.samples/*.png
+.samples/*.docx
+
+# 日志与临时文件
+*.log
+*.tmp
+tmp.md
+.DS_Store
+Thumbs.db

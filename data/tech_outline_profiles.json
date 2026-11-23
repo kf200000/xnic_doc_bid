@@ -1,0 +1,135 @@
+{
+  "name": "放射影像人工智能平台技术规格目录模板",
+  "match_all": ["放射影像人工智能平台", "儿童骨龄辅助评估", "CT-FFR", "BI-RADS"],
+  "nodes": [
+    {
+      "code": "1", "level": 1, "title": "基本要求",
+      "children": [
+        {
+          "code": "1.1", "level": 2, "title": "标的构成",
+          "children": [
+            {"code": "1.1.1", "level": 3, "title": "放射影像标注平台", "source_serial": 1,
+             "requirement": {"serial": "1-1）", "title": "放射影像标注平台", "content": "1套，包含数据管理、数据标注、机器学习、深度学习、生境分析、统计分析、任务管理（详见序号3-65）。", "must": true, "evidence": "企业承诺"}},
+            {"code": "1.1.2", "level": 3, "title": "放射影像人工智能平台", "source_serial": 1,
+             "requirement": {"serial": "1-2）", "title": "放射影像人工智能平台", "content": "包含儿童骨龄辅助评估系统1套、乳腺MR辅助评估系统1套、MRI肝脏智能辅助系统1套（详见序号66-117）。", "must": true, "evidence": "企业承诺"}},
+            {"code": "1.1.3", "level": 3, "title": "血流动力学分析系统", "source_serial": 1,
+             "requirement": {"serial": "1-3）", "title": "血流动力学分析系统", "content": "1套，包含CT-FFR处理功能、脑小血管病分析（详见序号118-140）。", "must": true, "evidence": "企业承诺"}},
+            {"code": "1.1.4", "level": 3, "title": "服务器", "source_serial": 1,
+             "requirement": {"serial": "1-4）", "title": "服务器", "content": "3台（详见序号141-148）。", "must": true, "evidence": "企业承诺"}},
+            {"code": "1.1.5", "level": 3, "title": "国产化要求", "source_serial": 1,
+             "requirement": {"serial": "1-5）", "title": "国产化要求", "content": "软硬件产品国产品牌。", "must": true, "evidence": "企业承诺"}},
+            {"code": "1.1.6", "level": 3, "title": "性质/证明", "source_serial": 1,
+             "requirement": {"serial": "1", "title": "性质/证明", "content": "★关键项；证明材料：企业承诺。", "must": true, "evidence": "企业承诺"}}
+          ]
+        }
+      ]
+    },
+    {
+      "code": "2", "level": 1, "title": "平台架构",
+      "children": [
+        {
+          "code": "2.1", "level": 2, "title": "B/S架构与部署",
+          "children": [
+            {"code": "2.1.1", "level": 3, "title": "Web登录与全功能网页化", "source_serial": 2,
+             "requirement": {"serial": "2", "title": "Web登录与全功能网页化", "content": "平台基于B/S架构设计，可实现Web登录，在网页中完成其所有功能。", "must": true, "evidence": "企业承诺"}},
+            {"code": "2.1.2", "level": 3, "title": "多院区局域网本地化部署", "source_serial": 2,
+             "requirement": {"serial": "2", "title": "多院区局域网本地化部署", "content": "支持多院区局域网内进行本地化部署，保证数据不出院。", "must": true, "evidence": "企业承诺"}},
+            {"code": "2.1.3", "level": 3, "title": "并发与共享", "source_serial": 2,
+             "requirement": {"serial": "2", "title": "并发与共享", "content": "支持多人并发访问及数据共享。", "must": true, "evidence": "企业承诺"}},
+            {"code": "2.1.4", "level": 3, "title": "性质/证明", "source_serial": 2,
+             "requirement": {"serial": "2", "title": "性质/证明", "content": "★关键项；证明材料：企业承诺。", "must": true, "evidence": "企业承诺"}}
+          ]
+        }
+      ]
+    },
+    {
+      "code": "3", "level": 1, "title": "放射影像标注平台",
+      "children": [
+        {"code": "3.1", "level": 2, "title": "数据接入与格式", "children": [
+          {"code": "3.1.1", "level": 3, "title": "数据接入", "ranges": [[3, 3]]},
+          {"code": "3.1.2", "level": 3, "title": "数据模态与格式", "ranges": [[4, 6]]}
+        ]},
+        {"code": "3.2", "level": 2, "title": "序列处理与4D数据", "ranges": [[7, 8]]},
+        {"code": "3.3", "level": 2, "title": "标注数据、导出与分享", "ranges": [[9, 11]]},
+        {"code": "3.4", "level": 2, "title": "MPR与3D视图", "ranges": [[12, 12]]},
+        {"code": "3.5", "level": 2, "title": "标注工具与病灶标注", "ranges": [[13, 16]]},
+        {"code": "3.6", "level": 2, "title": "病灶外扩", "ranges": [[17, 17]]},
+        {"code": "3.7", "level": 2, "title": "AI自动标注与大模型分割", "ranges": [[18, 19]]},
+        {"code": "3.8", "level": 2, "title": "病灶与器官分割", "ranges": [[20, 23]]},
+        {"code": "3.9", "level": 2, "title": "影像组学特征提取", "ranges": [[24, 28]]},
+        {"code": "3.10", "level": 2, "title": "特征筛选与机器学习", "ranges": [[29, 31]]},
+        {"code": "3.11", "level": 2, "title": "可解释性与聚类分析", "ranges": [[32, 33]]},
+        {"code": "3.12", "level": 2, "title": "2D/3D分析与深度学习场景", "ranges": [[34, 35]]},
+        {"code": "3.13", "level": 2, "title": "数据增强与模型库", "ranges": [[36, 40]]},
+        {"code": "3.14", "level": 2, "title": "训练、评价、验证与可解释", "ranges": [[41, 45]]},
+        {"code": "3.15", "level": 2, "title": "生境分析", "ranges": [[46, 52]]},
+        {"code": "3.16", "level": 2, "title": "数据预处理", "children": [
+          {"code": "3.16.1", "level": 3, "title": "影像数据预处理", "ranges": [[53, 53]]},
+          {"code": "3.16.2", "level": 3, "title": "临床数据预处理", "ranges": [[54, 54]]}
+        ]},
+        {"code": "3.17", "level": 2, "title": "统计分析", "children": [
+          {"code": "3.17.1", "level": 3, "title": "描述性与显著性分析", "ranges": [[55, 56]]},
+          {"code": "3.17.2", "level": 3, "title": "ROC、相关性与一致性", "ranges": [[57, 59]]},
+          {"code": "3.17.3", "level": 3, "title": "回归与生存分析", "ranges": [[60, 62]]}
+        ]},
+        {"code": "3.18", "level": 2, "title": "任务管理与权限", "ranges": [[63, 65]]}
+      ]
+    },
+    {
+      "code": "4", "level": 1, "title": "儿童骨龄辅助评估系统",
+      "children": [
+        {"code": "4.1", "level": 2, "title": "图像质控与骨发育中心识别", "ranges": [[66, 67]]},
+        {"code": "4.2", "level": 2, "title": "骨骺标记、分级与骨龄计算", "ranges": [[68, 72]]},
+        {"code": "4.3", "level": 2, "title": "自动描述与异常识别", "ranges": [[73, 74]]},
+        {"code": "4.4", "level": 2, "title": "变化图与生长发育评价", "ranges": [[75, 80]]},
+        {"code": "4.5", "level": 2, "title": "报告生成", "ranges": [[81, 83]]},
+        {"code": "4.6", "level": 2, "title": "医疗器械注册证", "ranges": [[84, 84]]}
+      ]
+    },
+    {
+      "code": "5", "level": 1, "title": "乳腺MR辅助评估系统",
+      "children": [
+        {"code": "5.1", "level": 2, "title": "序列识别与病灶检出匹配", "ranges": [[85, 86]]},
+        {"code": "5.2", "level": 2, "title": "病灶定位与强化分类", "ranges": [[87, 90]]},
+        {"code": "5.3", "level": 2, "title": "强化动力学与形态学分析", "ranges": [[91, 98]]},
+        {"code": "5.4", "level": 2, "title": "BI-RADS、量化与报告", "ranges": [[99, 101]]},
+        {"code": "5.5", "level": 2, "title": "医疗器械注册证", "ranges": [[102, 102]]}
+      ]
+    },
+    {
+      "code": "6", "level": 1, "title": "MRI肝脏智能辅助系统",
+      "children": [
+        {"code": "6.1", "level": 2, "title": "序列识别与肝脏背景评估", "ranges": [[103, 104]]},
+        {"code": "6.2", "level": 2, "title": "病灶智能检出、关联与分类", "ranges": [[105, 108]]},
+        {"code": "6.3", "level": 2, "title": "病灶量化、征象与筛选", "ranges": [[109, 114]]},
+        {"code": "6.4", "level": 2, "title": "诊断报告", "ranges": [[115, 116]]},
+        {"code": "6.5", "level": 2, "title": "医疗器械注册证", "ranges": [[117, 117]]}
+      ]
+    },
+    {
+      "code": "7", "level": 1, "title": "血流动力学分析系统（脑小血管病分析部分，序号118-125；原文截止）",
+      "children": [
+        {"code": "7.1", "level": 2, "title": "颅脑MR图像分类与脑区分割", "ranges": [[118, 119]]},
+        {"code": "7.2", "level": 2, "title": "TOF-MRA病灶检出、定位与量化", "ranges": [[120, 122]]},
+        {"code": "7.3", "level": 2, "title": "血管分割、命名与3D重建", "ranges": [[123, 125]]},
+        {"code": "7.4", "level": 2, "title": "未展开部分（目录占位）", "children": [
+          {"code": "7.4.1", "level": 3, "title": "CT-FFR处理功能", "placeholder": true,
+           "placeholder_code": "126-140区间", "placeholder_text": "原文未展开，需补充。"},
+          {"code": "7.4.2", "level": 3, "title": "脑小血管病分析后续要求", "placeholder": true,
+           "placeholder_code": "126-140区间", "placeholder_text": "原文未展开，需补充。"}
+        ]}
+      ]
+    },
+    {
+      "code": "8", "level": 1, "title": "服务器及未展开要求（目录占位）",
+      "children": [
+        {"code": "8.1", "level": 2, "title": "服务器3台", "placeholder": true,
+         "placeholder_code": "141-148", "placeholder_text": "原文未展开具体技术参数，需补充。"},
+        {"code": "8.2", "level": 2, "title": "软硬件国产化", "source_serial": 1,
+         "requirement": {"serial": "1-5）", "title": "软硬件国产化", "content": "软硬件产品国产品牌（已在基本要求中列明）。", "must": true, "evidence": "企业承诺"}},
+        {"code": "8.3", "level": 2, "title": "数据管理与接口服务", "ranges": [[149, 150]]},
+        {"code": "8.4", "level": 2, "title": "服务团队与验收资质", "ranges": [[151, 155]]}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XNIC 文档与标书智能工作台</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <div class="brand"><div class="logo">西</div><div><b>XNIC 智能工作台</b><span>DOC · BID SYSTEM</span></div></div>
+    <nav class="nav" id="nav">
+      <button class="nav-item active" data-view="dash"><i>概</i><span>概览</span></button>
+      <button class="nav-item" data-view="docs"><i>库</i><span>文档库管理</span></button>
+      <button class="nav-item" data-view="certs"><i>证</i><span>资质证照</span></button>
+      <button class="nav-item" data-view="bids"><i>标</i><span>标书中心</span></button>
+      <button class="nav-item" data-view="parse"><i>析</i><span>招标解析</span></button>
+      <button class="nav-item" data-view="editor"><i>编</i><span>标书编制</span></button>
+      <button class="nav-item" data-view="check"><i>校</i><span>合规校验</span></button>
+    </nav>
+    <div class="side-foot"><b>中核西仪 · 本地开发环境</b>Flask + SQLite<br>非密演示数据 · AI 内容需人工终审</div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <div class="crumb" id="crumb">概览<span>经营与投标总览</span></div>
+      <div class="spacer"></div>
+      <div class="demo-tag">可运行系统 · 数据本地持久化</div>
+      <div class="user"><div class="avatar">经</div>经营计划部 · 张</div>
+    </header>
+
+    <div class="scroll">
+      <section class="view active" id="view-dash">
+        <div class="grid4" id="dashStats"></div>
+        <div class="row2">
+          <div class="card"><h3 class="panel">投标节点<button class="link" data-jump="bids">全部 →</button></h3><ul class="tl" id="dashUpcoming"></ul></div>
+          <div class="card"><h3 class="panel">资质到期预警<button class="link" data-jump="certs">台账 →</button></h3><ul class="tl" id="dashWarnings"></ul></div>
+        </div>
+        <div class="card mt12"><h3 class="panel">标书编制进度<button class="link" data-jump="bids">标书中心 →</button></h3>
+          <div class="table-wrap"><table><thead><tr><th style="width:38%">项目</th><th>业主</th><th>堆型</th><th>截止</th><th>状态</th><th style="width:18%">完成度</th></tr></thead><tbody id="dashBids"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-docs">
+        <div class="card lib-head">
+          <div class="lib-title"><b>文档库管理</b><p>文件上传 · 三维分类 · 三级密级 · 受控版本 · 全文检索 · 引用统计 · 僵尸文档识别</p></div>
+          <div class="lib-chips" id="libStats"></div>
+          <button class="btn primary" data-modal="doc">＋ 上传文档</button>
+        </div>
+
+        <div class="lib-tabs">
+          <button class="tab active" data-libtab="ledger">文档台账</button>
+          <button class="tab" data-libtab="versions">受控版本</button>
+          <button class="tab" data-libtab="refs">引用统计</button>
+          <button class="tab" data-libtab="zombie">僵尸文档</button>
+          <button class="tab" data-libtab="security">密级审批</button>
+        </div>
+
+        <div class="lib-pane" id="pane-ledger">
+          <div class="toolbar">
+            <input type="text" id="docSearch" placeholder="全文检索：文档名 / 正文 / 标签 / 部门 / 责任人…">
+            <select id="docCat"><option value="">全部分类</option></select>
+            <select id="docLine"><option value="">全部产品线</option></select>
+            <select id="docReactor"><option value="">全部堆型</option></select>
+            <select id="docSec"><option value="">全部密级</option><option>公开</option><option>内部</option><option>商密</option></select>
+            <select id="docStatus"><option value="">全部状态</option><option>正常</option><option>待评估</option><option>已归档</option><option>已作废</option></select>
+            <select id="docSort"><option value="updated">按更新时间</option><option value="refs">按被引用</option><option value="name">按名称</option><option value="idle">按闲置时长</option></select>
+            <button class="btn sm" id="docTrashToggle" title="查看已移入回收站的文档">回收站</button>
+            <div class="spacer"></div><span class="muted" id="docCount"></span>
+          </div>
+          <div class="card table-card"><div class="table-wrap"><table><thead><tr><th style="width:28%">文档名称</th><th>分类 / 产品线</th><th>堆型</th><th>密级</th><th>版本</th><th>引用</th><th>最近访问</th><th>状态</th><th style="width:118px">操作</th></tr></thead><tbody id="docRows"></tbody></table></div></div>
+        </div>
+
+        <div class="lib-pane hidden" id="pane-versions">
+          <div class="toolbar"><select id="verDoc"><option value="">全部文档</option></select><div class="spacer"></div><span class="muted" id="verCount"></span></div>
+          <div class="card table-card"><div class="table-wrap"><table><thead><tr><th style="width:26%">文档</th><th>版本</th><th>状态</th><th>变更说明</th><th>创建人</th><th>时间</th><th></th></tr></thead><tbody id="verRows"></tbody></table></div></div>
+        </div>
+
+        <div class="lib-pane hidden" id="pane-refs">
+          <div class="pane-grid">
+            <div class="card"><h3 class="panel">被引用 TOP 8<span class="muted" id="refTotal"></span></h3><div id="refTop"></div></div>
+            <div class="card"><h3 class="panel">按标书分布</h3><div class="table-wrap"><table><thead><tr><th>标书</th><th>状态</th><th style="width:70px">引用次数</th></tr></thead><tbody id="refByBid"></tbody></table></div></div>
+          </div>
+          <div class="card mt12"><h3 class="panel">最近引用记录</h3><div class="table-wrap"><table><thead><tr><th>时间</th><th>文档</th><th>标书</th><th>章节</th><th>操作人</th></tr></thead><tbody id="refRecent"></tbody></table></div></div>
+        </div>
+
+        <div class="lib-pane hidden" id="pane-zombie">
+          <div class="card lib-note"><b>僵尸文档识别规则</b><p>连续 24 个月（730 天）无检索、引用、下载、详情查看的文档自动标记“待评估”，由文档责任人确认续用 / 归档 / 作废。系统不自动删除；核安全相关记录按 HAF003 质量记录期限保存。</p></div>
+          <div class="card table-card mt12"><div class="table-wrap"><table><thead><tr><th style="width:32%">文档</th><th>分类</th><th>密级</th><th>最近访问</th><th>闲置天数</th><th>处置</th></tr></thead><tbody id="zombieRows"></tbody></table></div></div>
+        </div>
+
+        <div class="lib-pane hidden" id="pane-security">
+          <div class="card lib-note"><b>三级密级管理</b><p>公开 / 内部 / 商密。商密文档禁止直接下载与外发，需提交外发申请并经安全保密管理员批准；降密须审批并留痕，不得由上传人自行下调。</p></div>
+          <div class="card mt12"><h3 class="panel">待审批申请<span class="muted" id="secPending"></span></h3><div class="table-wrap"><table><thead><tr><th>文档</th><th>类型</th><th>密级变更</th><th>理由</th><th>申请人</th><th>时间</th><th></th></tr></thead><tbody id="secRows"></tbody></table></div></div>
+          <div class="card mt12"><h3 class="panel">审批记录</h3><div class="table-wrap"><table><thead><tr><th>文档</th><th>类型</th><th>结果</th><th>审批人</th><th>时间</th></tr></thead><tbody id="secHistory"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-certs">
+        <div class="lib-chips" id="certStats"></div>
+        <div class="toolbar">
+          <input type="text" id="certSearch" placeholder="搜索证书名称、编号、发证机关、责任部门…">
+          <select id="certCategory"><option value="">全部类别</option></select>
+          <select id="certState"><option value="">全部状态</option><option value="有效">有效</option><option value="临期">临期(≤90天)</option><option value="已过期">已过期</option><option value="已作废">已作废</option></select>
+          <div class="spacer"></div><span class="muted" id="certCount"></span>
+          <button class="btn" id="certTrashBtn">回收站</button>
+          <button class="btn" data-modal="cert">＋ 新增资质</button>
+          <button class="btn primary" id="certVerify">投标前核验</button>
+        </div>
+        <div class="card table-card"><div class="table-wrap"><table><thead><tr><th style="width:22%">证书名称</th><th>类别</th><th>证书编号</th><th>发证机关</th><th>有效期至</th><th>状态</th><th>责任部门</th><th style="width:15%">操作</th></tr></thead><tbody id="certRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="view-bids">
+        <div class="toolbar">
+          <select id="bidStatus"><option value="">全部状态</option><option>编制中</option><option>资料收集</option><option>待决策</option><option>已提交</option><option>已中标</option></select>
+          <select id="bidReactor"><option value="">全部堆型</option><option>华龙一号</option><option>CAP1000</option><option>VVER</option><option>核设施</option><option>出口项目</option><option>小堆</option></select>
+          <div class="spacer"></div><span class="muted" id="bidCount"></span><button class="btn primary" data-modal="bid">＋ 新建标书</button>
+        </div>
+        <div class="card table-card"><div class="table-wrap"><table><thead><tr><th style="width:34%">项目名称</th><th>业主</th><th>堆型</th><th>投标截止</th><th>状态</th><th style="width:14%">进度</th><th style="width:14%">操作</th></tr></thead><tbody id="bidRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="view-parse">
+        <div class="check-toolbar">
+          <select id="parseBid" class="bid-select"></select>
+          <button class="btn" id="tenderTrashToggle">已作废 0</button>
+          <button class="btn" data-modal="tenderterm">行业术语库</button>
+          <button class="btn primary" data-modal="tenderfile">＋ 登记招标文件</button>
+        </div>
+        <div class="card flow-steps" id="parseFlow"></div>
+        <div class="tabs parse-tabs">
+          <button class="tab active" data-ptab="doc">① 招标文件解析 · 制式文件</button>
+          <button class="tab" data-ptab="spec">② 技术规格书解析</button>
+        </div>
+        <div id="parseDocPane">
+          <div class="card lib-head">
+            <div class="lib-title"><b>招标文件解析 · 制式文件</b><p>招标公示 / 招标人须知 / 评分办法 / 合同条款等制式文件：资格条件 · 评分表 · ★条款 · 废标条款 · 技术参数 · 交付期 · 保证金 · 份数装订 · 澄清截止 八类抽取 · 逐条定位原文页码 · 置信度不足标黄待人工确认 · 确认后锁定基准版 · 澄清答疑生成差异版</p></div>
+            <div class="lib-chips" id="tenderStats"></div>
+          </div>
+          <div class="card table-card mt12"><div class="table-wrap"><table><thead><tr><th>类型</th><th style="width:26%">文件名称</th><th>页数</th><th>标称总分</th><th>评分合计</th><th>抽取</th><th>待确认</th><th>状态</th><th style="width:240px">操作</th></tr></thead><tbody id="tenderRows"></tbody></table></div></div>
+          <div id="extractPane"></div>
+        </div>
+        <div id="parseSpecPane" class="hidden">
+          <div class="card mt12 tech-picker" id="techPicker"></div>
+          <div id="techSpecPane"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-editor">
+        <div class="ed-top">
+          <div class="ed-title-row"><select id="editorBid" class="bid-select"></select><span class="save-state" id="saveState">已连接本地数据库</span></div>
+          <div class="chips" id="editorChips"></div>
+          <div class="ed-actions"><button class="btn" id="llmConfig">模型配置</button><button class="btn" id="aiGenerate">AI 编写本节</button><button class="btn" id="aiBatch">技术标编写 Agent</button><button class="btn" id="techAudit">对齐审核</button><button class="btn gold" id="editorCheck">合规校验</button><button class="btn" id="previewBook">全书预览</button><button class="btn" id="exportWord">导出 Word</button><button class="btn primary" id="exportBid">导出 MD 预览版</button></div>
+        </div>
+        <!-- 技术标编写 Agent 进度条：内嵌常驻，不使用模态框，运行期间正文区始终可见可编辑 -->
+        <div id="agentDock" class="agent-dock hidden"></div>
+        <div class="ed-grid">
+          <div class="sec-col" id="secCol">
+            <div class="sec-audit" id="secAudit">
+              <div class="sa-score" id="saScore"><b>--</b><span>对齐分</span></div>
+              <div class="sa-meta"><b id="saVerdict">技术目录 ↔ 技术规格书</b><span id="saLine">尚未执行对齐审核</span></div>
+              <button class="btn sm" id="saOpen">审核项</button>
+            </div>
+            <div class="sec-list" id="secList"></div>
+            <div class="sec-resizer" id="secResizer" title="左右拖动调整目录树宽度"></div>
+          </div>
+          <div class="canvas">
+            <div class="canvas-head"><h1 id="secTitle">请选择章节</h1><select id="secStatus"><option>未开始</option><option>编制中</option><option>已完成</option></select></div>
+            <div class="canvas-tabs">
+              <button class="ctab active" data-ctab="body">正文（可编辑 · MD）</button>
+              <button class="ctab" data-ctab="preview">预览（MD 渲染）</button>
+              <button class="ctab" data-ctab="src">原文技术要求</button>
+              <span class="ai-src" id="aiSrc"></span>
+            </div>
+            <div class="ai-notice">正文统一为 Markdown 格式存 content_ai（AI 生成须人工终审）· 预览页签按导出效果渲染 · 原文技术要求存 content 字段（解析生成，不随编辑改动）</div>
+            <textarea id="secBody" placeholder="本节正文尚未生成：正文统一用 Markdown（### 小标题 / - 列表 / 表格），点右上「AI 编写本节」生成初稿…"></textarea>
+            <div class="src-pane hidden" id="srcPane"></div>
+            <div class="md-pane hidden" id="previewPane"></div>
+            <div class="canvas-foot"><span id="wordCount">0 字</span><button class="btn primary" id="saveSection">保存本节</button></div>
+          </div>
+          <div class="panel-r">
+            <div class="tabs"><button class="tab active" data-tab="score">评分响应</button><button class="tab" data-tab="spec">技术规格</button><button class="tab" data-tab="audit">对齐审核</button><button class="tab" data-tab="mat">素材推荐</button><button class="tab" data-tab="risk">合规提醒</button></div>
+            <div class="tab-body" id="tabScore"></div>
+            <div class="tab-body hidden" id="tabSpec"></div>
+            <div class="tab-body hidden" id="tabAudit"></div>
+            <div class="tab-body hidden" id="tabMat"></div>
+            <div class="tab-body hidden" id="tabRisk"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="view-check">
+        <div class="check-toolbar"><select id="checkBid" class="bid-select"></select><button class="btn" data-modal="checkinfo">校验信息</button><button class="btn primary" id="runCheck">重新校验</button></div>
+        <div class="check-hero"><div class="score" id="checkScore"><b>--</b><span>合规分</span></div><div class="check-summary"><b id="checkTitle">提交前合规校验</b><p id="checkSummary">选择项目并执行校验。</p></div></div>
+        <div class="card" id="checkList"><div class="empty">尚未执行校验</div></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<aside class="drawer" id="drawer"><div class="dr-head"><h4 id="drTitle">文档详情</h4><button class="close" data-close="drawer">×</button></div><div class="dr-body" id="drBody"></div></aside>
+
+<div class="mask" id="modalMask"><div class="modal"><div class="modal-head"><h3 id="modalTitle"></h3><button class="close" data-close="modal">×</button></div><div id="modalBody"></div></div></div>
+
+<div class="pv-mask" id="previewMask">
+  <div class="pv-dialog">
+    <div class="pv-head">
+      <div class="pv-title"><b id="pvTitle">文档预览</b><span class="muted" id="pvMeta"></span></div>
+      <div class="pv-tools"><a class="btn sm" id="pvDownload" href="#" target="_blank">下载原件</a><button class="close" data-close="preview">×</button></div>
+    </div>
+    <div class="pv-body" id="pvBody"></div>
+  </div>
+</div>
+
+<div class="pv-mask" id="sourceMask">
+  <div class="pv-dialog src-dialog">
+    <div class="pv-head">
+      <div class="pv-title"><b id="srcTitle">招标文件原文</b><span class="muted" id="srcMeta"></span></div>
+      <div class="pv-tools">
+        <select id="srcPageSel" class="src-jump" title="跳转页码"></select>
+        <button class="btn sm" id="srcPrevPage">上一页</button>
+        <button class="btn sm" id="srcNextPage">下一页</button>
+        <a class="btn sm" id="srcLayout" href="#" target="_blank" rel="noopener" style="display:none">排版稿</a>
+        <a class="btn sm" id="srcDownload" href="#" target="_blank" rel="noopener">下载原件</a>
+        <button class="close" data-close="source">×</button>
+      </div>
+    </div>
+    <div class="pv-body src-body" id="srcBody"></div>
+    <div class="pv-foot"><span id="srcLoc">全文浏览</span><span class="muted" id="srcPageNote">原文与抽取结果同源解析 · 页码可对照核对</span></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- Mermaid 流程图解析器（本地单文件，离线可用）：供正文预览 / 全书预览渲染 ```mermaid 块 -->
+<script src="/static/vendor/mermaid.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>

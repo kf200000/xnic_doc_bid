@@ -1,0 +1,28 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="utf-8"><style>
+body{margin:0;background:#f4f7fb;font-family:"Microsoft YaHei",sans-serif;color:#12263f;width:1200px;height:760px}
+.wrap{padding:28px 34px}
+h1{font-size:22px;margin:0 0 4px;color:#0b2b57}
+.sub{font-size:12px;color:#7b8794;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:#fff;border:1px solid #d9e2ec;border-radius:8px;padding:12px 14px}
+.card b{display:block;font-size:13px;color:#0b2b57;margin-bottom:6px}
+.card span{font-size:11.5px;color:#5b6774;line-height:1.7}
+.card ul{margin:4px 0 0 16px;padding:0;font-size:11.5px;color:#43505e;line-height:1.8}
+.flow{display:flex;align-items:center;gap:10px;margin-top:18px}
+.node{flex:1;background:#fff;border:1px solid #c9a227;border-radius:8px;padding:10px;text-align:center;font-size:12px;color:#0b2b57}
+.arrow{color:#c9a227;font-size:18px}
+.foot{margin-top:18px;font-size:10.5px;color:#7b8794}
+</style></head><body><div class="wrap">
+<h1>实物保护系统（PPS）系统组成框图</h1>
+<div class="sub">XNIC-PPS-DWG-2026-004 · V2.0 · 商密 · 仅限内部查阅</div>
+<div class="grid">
+<div class="card"><b>周界入侵报警</b><span>双技术探测器、张力围栏、微波对射</span><ul><li>分区 12 个防区</li><li>报警响应 ≤ 1 s</li></ul></div>
+<div class="card"><b>视频监控</b><span>高清球机、固定枪机、存储 90 天</span><ul><li>点位 186 个</li><li>与报警联动预置位</li></ul></div>
+<div class="card"><b>出入口控制</b><span>双因子读卡器、速通门、车辆道闸</span><ul><li>通道 28 条</li><li>与人事系统同步权限</li></ul></div>
+<div class="card"><b>周界照明与音响</b><span>高压钠灯、号角扬声器</span><ul><li>与报警分区联动</li></ul></div>
+<div class="card"><b>中央控制室</b><span>集成管理平台、报警复核工作站</span><ul><li>双机热备</li><li>事件留存 5 年</li></ul></div>
+<div class="card"><b>供电与防雷</b><span>UPS 2×20kVA、二级防雷</span><ul><li>后备时间 ≥ 60 min</li></ul></div>
+</div>
+<div class="flow"><div class="node">前端探测 / 采集</div><span class="arrow">→</span><div class="node">区域汇聚交换机</div><span class="arrow">→</span><div class="node">中央集成平台</div><span class="arrow">→</span><div class="node">值班终端 / 上级平台</div></div>
+<div class="foot">本图为系统级示意图，设备数量与型号以设备清单（XNIC-PPS-BOM-2026-011）为准。</div>
+</div></body></html>
