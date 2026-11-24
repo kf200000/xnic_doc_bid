@@ -172,9 +172,9 @@
               <button class="ctab" data-ctab="src">原文技术要求</button>
               <span class="ai-src" id="aiSrc"></span>
             </div>
-            <div class="ai-notice">正文统一为 Markdown 格式存 content_ai（AI 生成须人工终审）· 预览页签按导出效果渲染 · 原文技术要求存 content 字段（解析生成，不随编辑改动）</div>
+            <div class="ai-notice">正文统一为 Markdown 格式存 content_ai（AI 生成须人工终审）· 预览页签按导出效果渲染 · 原文技术要求存 content 字段（可编辑，改动随「保存本节」写回）</div>
             <textarea id="secBody" placeholder="本节正文尚未生成：正文统一用 Markdown（### 小标题 / - 列表 / 表格），点右上「AI 编写本节」生成初稿…"></textarea>
-            <div class="src-pane hidden" id="srcPane"></div>
+            <textarea class="src-pane hidden" id="srcPane" placeholder="本节暂无原文技术要求：可在「招标解析」解析技术规格书后同步到技术标，也可直接在此补录"></textarea>
             <div class="md-pane hidden" id="previewPane"></div>
             <div class="canvas-foot"><span id="wordCount">0 字</span><button class="btn primary" id="saveSection">保存本节</button></div>
           </div>

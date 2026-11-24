@@ -205,7 +205,7 @@ body.col-resizing{cursor:col-resize;user-select:none}
 .ctab{border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 11px;font-size:11.5px;color:var(--muted)}
 .ctab.active{background:var(--blue-l);border-color:#c9dcf5;color:var(--blue);font-weight:600}
 .ai-src{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:10.5px}
-.src-pane{flex:1;min-height:450px;max-height:calc(100vh - 320px);overflow:auto;border:1px solid var(--line);border-radius:7px;padding:14px;font-size:12px;line-height:1.85;color:#4a5568;background:#fbfcfe;white-space:pre-wrap}
+.src-pane{flex:1;min-height:450px;width:100%;resize:vertical;border:1px solid var(--line);border-radius:7px;padding:14px;font-size:12.5px;line-height:1.9;color:#4a5568;background:#fbfcfe}
 
 /* ---- 模型配置弹窗：预设 / 测试结果 ---- */
 .modal{max-width:640px;max-height:88vh;overflow:auto}
@@ -425,3 +425,8 @@ body.col-resizing{cursor:col-resize;user-select:none}
 .md-pane .mermaid svg{max-width:100%;height:auto}
 .md-pane.md-mermaid-missing .mermaid{font:11px/1.7 ui-monospace,Consolas,monospace;white-space:pre-wrap;text-align:left;background:#F5F7FA;padding:8px;border-radius:5px}
 .md-pane.md-mermaid-missing .md-figure::after{content:"Mermaid 解析器未加载，当前显示流程图源码";display:block;font-size:10.5px;color:#B45309;margin-top:6px}
+/* drawio 架构图：后端渲染为内嵌 PNG，状态/错误文案为异步占位 */
+.md-pane .md-drawio{text-align:center}
+.md-pane .md-drawio-status,.md-pane .md-drawio-error{display:block;font-size:11px;color:var(--muted);padding:14px 0}
+.md-pane .md-drawio-error{color:#B45309}
+.md-pane .md-drawio-img{display:block;max-width:100%;height:auto;margin:0 auto;border:1px solid var(--line);border-radius:5px;background:#fff}

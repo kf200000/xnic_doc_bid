@@ -676,7 +676,7 @@ function selectSection(id,force=false){
   const s=state.workspace.sections.find(x=>x.id===id);if(!s)return;state.currentSectionId=id;state.dirty=false;
   $('secTitle').textContent=`${s.code} ${s.title}`;$('secStatus').value=s.status;
   $('secBody').value=s.content_ai||'';
-  $('srcPane').textContent=s.content||'（本节暂无原文技术要求：可在「招标解析」解析技术规格书后同步到技术标）';
+  $('srcPane').value=s.content||'';
   $('aiSrc').innerHTML=s.ai_model?`<span class="pill p-blue">${esc(s.ai_model)}</span> <span class="muted">${esc((s.ai_written_at||'').slice(0,16))}</span>`:'<span class="pill p-gray">正文未生成</span>';
   $('saveState').textContent=s.ai_generated?'含 AI 辅助内容 · 需人工终审':'已加载本地版本';
   setCanvasTab(state.canvasTab||'body');updateWordCount();state.dirty=false;
@@ -691,6 +691,10 @@ function setCanvasTab(tab){
   $('srcPane').classList.toggle('hidden',tab!=='src');
   $('previewPane').classList.toggle('hidden',tab!=='preview');
   if(tab==='preview')renderMdPreview();
+  if(tab==='src'||tab==='body'){
+    const body=$('secBody').value.length,src=$('srcPane').value.length;
+    $('wordCount').textContent=tab==='src'?`原文 ${src} 字 · 正文 ${body} 字`:`${body} 字`;
+  }
 }
 document.querySelectorAll('.ctab').forEach(b=>b.onclick=()=>setCanvasTab(b.dataset.ctab));
 
@@ -716,9 +720,13 @@ function mdToHtml(src){
       while(i<lines.length&&!/^```/.test(lines[i].trim())){buf.push(lines[i]);i++}
       i++;
       const code=buf.join('\n');
-      out.push(lang==='mermaid'
-        ?`<div class="md-figure"><span class="md-figure-cap">流程图 / 架构图（Mermaid）</span><div class="mermaid">${esc(code)}</div></div>`
-        :`<pre><code>${esc(code)}</code></pre>`);
+      if(lang==='mermaid'){
+        out.push(`<div class="md-figure"><span class="md-figure-cap">流程图 / 架构图（Mermaid）</span><div class="mermaid">${esc(code)}</div></div>`);
+      }else if(lang==='drawio'){
+        out.push(`<div class="md-figure md-drawio" data-drawio="${encodeURIComponent(code)}"><span class="md-figure-cap">系统架构图（drawio）</span><span class="md-drawio-status">正在生成架构图…</span></div>`);
+      }else{
+        out.push(`<pre><code>${esc(code)}</code></pre>`);
+      }
       continue;
     }
     const h=/^(#{1,6})\s+(.*)$/.exec(t);
@@ -781,12 +789,27 @@ function renderMermaidIn(root){
   }
   if(!painted())root.classList.add('md-mermaid-missing');
 }
+/* 把预览里的 drawio 占位节点异步渲染成内嵌 PNG（后端 /api/drawio/render）。
+   单个图失败只显示源码，不影响其余内容；重复渲染用 data-done 标记避免重复请求。 */
+function renderDrawioIn(root){
+  if(!root)return;
+  root.querySelectorAll('.md-drawio:not([data-done])').forEach(async node=>{
+    node.dataset.done='1';
+    let cfg;
+    try{cfg=JSON.parse(decodeURIComponent(node.dataset.drawio||''));}
+    catch(e){node.innerHTML='<span class="md-drawio-error">架构图配置不是合法 JSON</span>';return}
+    try{
+      const r=await api('/api/drawio/render',{method:'POST',body:cfg});
+      node.innerHTML=`<img class="md-drawio-img" src="${r.image}" alt="系统架构图">`;
+    }catch(e){node.innerHTML=`<pre><code>${esc(decodeURIComponent(node.dataset.drawio||''))}</code></pre><span class="md-drawio-error">架构图渲染失败：${esc(e.message)}</span>`}
+  });
+}
 function renderMdPreview(){
   const box=$('previewPane');if(!box)return;
   const s=(state.workspace?.sections||[]).find(x=>x.id===state.currentSectionId);
   box.innerHTML=`<div class="md-title">按导出效果渲染 · ${esc(s?s.code+' '+s.title:'本节正文')}</div>`
     +mdToHtml($('secBody').value);
-  renderMermaidIn(box);
+  renderMermaidIn(box);renderDrawioIn(box);
 }
 function renderTechTab(){
   const box=$('tabSpec');if(!box||!state.workspace)return;
@@ -1007,11 +1030,11 @@ function renderScore(items){
   $('tabScore').innerHTML=`<table class="mini"><thead><tr><th>评分项</th><th>分</th><th>章节</th><th>状态</th></tr></thead><tbody>${items.map(s=>`<tr><td>${esc(s.item)}</td><td>${s.score}</td><td>${s.section_code}</td><td>${pill(s.status,statusClass(s.status))}</td></tr>`).join('')}</tbody></table><p class="muted" style="margin-top:8px">已完成 ${responded.length} / ${items.length} 项，覆盖 ${covered} 分（共 ${total} 分）。</p>`;
 }
 function renderMaterials(items){$('tabMat').innerHTML=(items.length?items.map(m=>`<div class="mat"><b>${esc(m.name)}</b><span>相似度 ${m.similarity}% · ${esc(m.source)}</span><div class="bar"><i style="width:${m.similarity}%"></i></div></div>`).join(''):'<div class="empty">暂无素材，请从文档中心引用</div>')+'<div class="ai-notice" style="margin-top:8px">复用前请核对：机组号、通道数量、抗震等级、防爆区域要求。</div>'}
-function updateWordCount(){$('wordCount').textContent=$('secBody').value.length+' 字';state.dirty=true;$('saveState').textContent='有未保存修改'}
-$('secBody').oninput=updateWordCount;$('secStatus').onchange=()=>{state.dirty=true;$('saveState').textContent='状态已修改，待保存'};
+function updateWordCount(){const body=$('secBody').value.length,src=$('srcPane').value.length;$('wordCount').textContent=state.canvasTab==='src'?`原文 ${src} 字 · 正文 ${body} 字`:`${body} 字`;state.dirty=true;$('saveState').textContent='有未保存修改'}
+$('secBody').oninput=updateWordCount;$('srcPane').oninput=updateWordCount;$('secStatus').onchange=()=>{state.dirty=true;$('saveState').textContent='状态已修改，待保存'};
 $('saveSection').onclick=async()=>{
   if(!state.currentSectionId)return;const btn=$('saveSection');setBusy(btn,true,'保存中…');
-  try{const r=await api('/api/sections/'+state.currentSectionId,{method:'PUT',body:{content_ai:$('secBody').value,status:$('secStatus').value}});state.dirty=false;$('saveState').textContent='已保存 · '+new Date().toLocaleTimeString();toast(r.message);await loadWorkspace(state.currentBidId)}catch(e){toast(e.message,true)}finally{setBusy(btn,false)}
+  try{const r=await api('/api/sections/'+state.currentSectionId,{method:'PUT',body:{content_ai:$('secBody').value,content:$('srcPane').value,status:$('secStatus').value}});state.dirty=false;$('saveState').textContent='已保存 · '+new Date().toLocaleTimeString();toast(r.message);await loadWorkspace(state.currentBidId)}catch(e){toast(e.message,true)}finally{setBusy(btn,false)}
 };
 $('aiGenerate').onclick=async()=>{
   if(!state.currentSectionId)return;
@@ -1277,7 +1300,7 @@ $('previewBook').onclick=async()=>{
       <button type="button" class="btn" id="bookWord">下载 Word 版</button>
       <a class="btn primary" href="/api/bids/${state.currentBidId}/export">下载 .md 预览版</a></div>`,'wide');
     const bw=$('bookWord');if(bw)bw.onclick=()=>downloadBidWord(bw);
-    const pane=document.querySelector('.md-pane.md-full');if(pane)renderMermaidIn(pane);
+    const pane=document.querySelector('.md-pane.md-full');if(pane){renderMermaidIn(pane);renderDrawioIn(pane)}
   }catch(e){toast(e.message,true)}
 };
 $('exportBid').onclick=()=>{if(state.currentBidId)window.location.href=`/api/bids/${state.currentBidId}/export`};

@@ -2017,16 +2017,33 @@ def latest_check(bid_id):
     return jsonify(json.loads(row["result_json"]))
 
 
+@app.post("/api/drawio/render")
+def render_drawio():
+    """把 drawio 配置渲染成 base64 PNG，供编制页/全书预览前端内嵌成图。
+
+    请求体：drawio 块的原始 JSON 配置本身（不是 Markdown 文本）。
+    """
+    from drawio_bridge import render_drawio_png_base64
+
+    data = request.get_json(silent=True)
+    uri = render_drawio_png_base64(json.dumps(data, ensure_ascii=False)) if isinstance(data, dict) else None
+    if uri is None:
+        return jsonify(error="架构图配置无效或渲染失败"), 400
+    return jsonify(image=uri)
+
+
 def _export_docx(bid_id, bid, sections):
     """整本 Markdown → Word：调用用户提供的 WordChapter.DocumentConverter。
 
-    Mermaid 代码块由 mmdc 渲染成 PNG 后嵌入 docx；转换完成再 PrettifyWord
+    Mermaid 代码块由 mmdc 渲染成 PNG 后嵌入 docx；drawio 配置块由 drawio_bridge
+    预先渲染成 PNG 并替换为图片引用；转换完成再 PrettifyWord
     （表格边框/表头底纹/图片居中限幅）。中间文件全部落在临时目录，不污染项目根。
     """
     try:
         import pypandoc
         import docx
         from WordChapter import DocumentConverter
+        from drawio_bridge import expand_drawio_blocks
     except ImportError as exc:
         return jsonify(error=f"Word 转换依赖未安装（{exc}）"), 503
     try:
@@ -2039,6 +2056,7 @@ def _export_docx(bid_id, bid, sections):
     md = render_bid_markdown(bid, sections)
     target = BASE_DIR / "data" / f"bid_{bid_id}_preview.docx"
     with tempfile.TemporaryDirectory(prefix="xnic_docx_") as tmp:
+        md = expand_drawio_blocks(md, tmp)
         src = Path(tmp) / "book.md"
         src.write_text(md, encoding="utf-8")
         out = Path(tmp) / "book.docx"
@@ -2094,13 +2112,26 @@ def export_bid(bid_id):
         if not body:
             raw = section["content"] or ""
             body = "【本节正文待编制】" if "【本节编写要点】" in raw or "【技术规格要求" in raw else raw or "【本节待编制】"
-        # ```mermaid 代码块交给页面内的 Mermaid 解析器成图；其余内容仍按段落输出
-        parts = re.split(r"(?ms)^```mermaid[ \t]*\r?\n(.*?)^```[ \t]*$", body)
-        for idx, part in enumerate(parts):
-            if idx % 2:
-                content.append(f'<div class="mermaid">{html.escape(part.strip())}</div>')
-            elif part.strip():
-                content.extend(f"<p>{html.escape(p)}</p>" for p in part.split("\n\n") if p.strip())
+        # 代码块统一拆分：mermaid 交页面 JS 渲染；drawio 由 drawio_bridge 渲染成
+        # base64 PNG 内嵌，HTML 自包含且无需落盘静态图片。
+        from drawio_bridge import render_drawio_png_base64
+        parts = re.split(r"(?ms)^```(mermaid|drawio)[ \t]*\r?\n(.*?)^```[ \t]*$", body)
+        for idx in range(0, len(parts) - 2, 3):
+            text_part = parts[idx]
+            kind, block = parts[idx + 1], parts[idx + 2]
+            if text_part.strip():
+                content.extend(f"<p>{html.escape(p)}</p>" for p in text_part.split("\n\n") if p.strip())
+            if kind == "mermaid":
+                content.append(f'<div class="mermaid">{html.escape(block.strip())}</div>')
+            else:
+                uri = render_drawio_png_base64(block)
+                if uri:
+                    content.append(f'<img class="drawio" src="{uri}" alt="系统架构图">')
+                else:
+                    content.append(f'<pre class="drawio-src">{html.escape(block.strip())}</pre>')
+        tail = parts[-1] if parts else ""
+        if tail.strip():
+            content.extend(f"<p>{html.escape(p)}</p>" for p in tail.split("\n\n") if p.strip())
     content.append("<hr><p><b>内部预审提示：</b>本文档含 AI 辅助内容，必须经授权人员人工终审后方可对外。</p>")
     # 与编制页共用同一份本地 JS 解析器；离线打开时脚本加载失败则原样显示流程图源码
     engine = (f'<script src="{request.host_url.rstrip("/")}/static/vendor/mermaid.min.js"></script>'
@@ -2113,7 +2144,12 @@ def export_bid(bid_id):
             "h1,h2{color:#0B2B57}p{white-space:pre-wrap}hr{margin:30px 0}"
             ".mermaid{margin:14px 0;padding:10px;border:1px solid #dbe3ef;border-radius:6px;"
             "background:#fcfdff;text-align:left;font:12px/1.7 Consolas,monospace;white-space:pre-wrap}"
-            ".mermaid svg{display:block;margin:0 auto;font-family:'Microsoft YaHei',sans-serif}</style>"
+            ".mermaid svg{display:block;margin:0 auto;font-family:'Microsoft YaHei',sans-serif}"
+            ".drawio{display:block;max-width:100%;height:auto;margin:16px auto;border:1px solid #dbe3ef;"
+            "border-radius:6px;background:#fff}"
+            ".drawio-src{margin:14px 0;padding:10px;border:1px solid #dbe3ef;border-radius:6px;"
+            "background:#fcfdff;text-align:left;font:12px/1.7 Consolas,monospace;white-space:pre-wrap}"
+            "</style>"
             + engine + "</head><body>" + "".join(content) + "</body></html>")
     target = BASE_DIR / "data" / f"bid_{bid_id}_preview.html"
     target.write_text(page, encoding="utf-8")
